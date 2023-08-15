@@ -9,6 +9,8 @@ import { useHistory } from 'react-router-dom';
 import HomeScreen from './Screens/HomeScreen';
 import RecordScreen from './Screens/RecordScreen';
 import ListenScreen from './Screens/ListenScreen';
+import UserForm from './Screens/userFormScreen';
+
 
 // Extra Screens
 import AboutScreen from './ExtraScreens/AboutScreen';
@@ -44,7 +46,10 @@ function App() {
               <Route path="/Logout" component={Logout} />
               <Route path="/Login" component={Login} />
               <Route path="/Register" component={Register} />
+             
               <PrivateRoute path="/Dashboard" component={Dashboard} />
+              <PrivateRoute path="/form" component={UserForm} />
+              
               <PrivateRoute path="/Words" component={WordList} />
               <PrivateRoute path="/AllRecordings" component={AllRecordings} />
             </Switch>
