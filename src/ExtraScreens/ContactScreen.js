@@ -10,11 +10,30 @@ export default function ContactScreen() {
             <HeaderComponent />
   
             <Container sx={{mt:10}}>
-  
-                  <h2 style={{fontWeight:'600', fontSize:'30px'}}>Contact</h2>
-  
-                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis viverra, orci sed iaculis pulvinar, lacus felis maximus purus, eget tristique est libero sit amet nisl. Cras dictum tempor ex porttitor scelerisque. Phasellus blandit id ligula vel facilisis. Vivamus vitae turpis sit amet risus vulputate tempor euismod ut neque. Donec bibendum at velit sed egestas. Aliquam dapibus nulla ex, sed mattis urna eleifend eget. Vestibulum ornare cursus risus, vel pharetra ante viverra non. Cras luctus consequat ante, ut maximus nisi scelerisque vitae. Sed congue aliquet augue vitae dictum. Integer rhoncus ornare cursus. Mauris fringilla eget elit a sodales.</p>
-            
+            <section class="contact-section">
+        <h2>Contact Us</h2>
+        <p>If you have any questions or need assistance, please reach out to us using the form below:</p>
+
+        <form action="/submit_contact" method="post">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required/>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required style={{width: '100%' , marginRight:"50px"}}/>
+            </div>
+
+            <div class="form-group">
+                <label for="message">Message:</label>
+                <textarea id="message" name="message" rows="10" required style={{ width: '100%', marginRight: '50px' }}></textarea>
+            </div>
+
+            <input type="submit" value="Submit"/>
+        </form>
+    </section>
+
             </Container>
   
             <Box sx={{mt:6}} >

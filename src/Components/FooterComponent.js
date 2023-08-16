@@ -10,9 +10,9 @@ export default function FooterComponent() {
                 </Container>
 
                 <Container sx={{mt:2}}>
-                        <Link to='/Privacy' style={{color:'white', textDecoration:'none'}}><span style={{ margin: '20px'}}>Privacy</span></Link>
-                        <Link to='/Terms' style={{color:'white', textDecoration:'none'}}><span style={{ margin: '20px'}}>Terms</span></Link>
-               
+                        {/* <Link to='/Privacy' style={{color:'white', textDecoration:'none'}}><span style={{ margin: '20px'}}>Privacy</span></Link>
+                        <Link to='/Terms' style={{color:'white', textDecoration:'none'}}><span style={{ margin: '20px'}}>Terms</span></Link> */}
+               <p style = {{color:"GrayText"}}>&copy; 2023 Svar. All rights reserved. Developed by IIT Delhi students.</p>
                 </Container>
         </Container>
     </>
