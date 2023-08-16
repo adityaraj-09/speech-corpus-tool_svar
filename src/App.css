@@ -27,7 +27,119 @@
 .App-link {
   color: #61dafb;
 }
+/* src/App.css */
+.form {
+  padding: 2rem;
+}
 
+/* src/App.css */
+
+
+h1 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+}
+
+form {
+  width: 70%; /* Adjust the width as needed */
+  margin: 0 auto; /* Center the form horizontally */
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background-color: #f9f9f9;
+}
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Style checkboxes */
+label input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+.checkbox-group ,.radio-group{
+  display: flex;
+  margin-bottom: 1rem;
+}
+
+.checkbox-group label ,.radio-group label{
+  display: flex;
+  align-items: center;
+  margin-right: 1rem;
+}
+
+.checkbox-group label input[type="checkbox"] {
+  margin-right: 0.25rem;
+  
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+/* Apply specific styles to the dialects dropdown */
+select {
+  background-color: #fff;
+  color: #333;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+
+.card {
+  width: 300px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+.card-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-title {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.card-text {
+  font-size: 18px;
+  color: #555;
+}
+
+.word_card{
+  display: flex;
+}
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
