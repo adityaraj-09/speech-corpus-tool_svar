@@ -6,7 +6,7 @@ export default function FooterComponent() {
     <>
         <Container style={{backgroundColor: '#0A1B29', textAlign:'center', padding: '30px'}} maxWidth='fluid'>
                 <Container>
-                    <img width='150px' src='./OpenSpeechWhite.png'/>
+                    <img width='90px' src='./OpenSpeechWhite.png'/>
                 </Container>
 
                 <Container sx={{mt:2}}>

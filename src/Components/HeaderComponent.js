@@ -69,7 +69,7 @@ export default function HeaderComponent() {
           sx={{ mr: 2, display: { xs: 'none', md: 'flex' } }}
         >
           <Link  to='/'>
-          <img width='150px' src='./openSpeechLogo.png'/>
+          <img width='80px' src='./openSpeechLogo.png'/>
           </Link>
 
         </Typography>
