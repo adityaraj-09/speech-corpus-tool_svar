@@ -22,6 +22,8 @@ const Mp3Recorder = new MicRecorder({
   prefix: "data:audio/wav;base64,",
 });
 
+
+ 
 export default function RecordScreen() {
   // State Declaration
   const [isRecording, setIsRecording] = React.useState(false)
@@ -39,12 +41,16 @@ export default function RecordScreen() {
   const [count, setCount] = React.useState(0)
   const [docLength, setdocLength] = React.useState(0)
   const [submittedForm, setSubmitted] = React.useState(false)
-
+  const [random_index, setRandomIndex] = React.useState(0)
+  const [listwords,setlistwords]=React.useState([])
+  
+  const list=["r","l"]
 
   async function FetchRandomWord() {
     db.collection('words').onSnapshot(snapshot => {
       // Set Random Word
       let randomID = Math.floor(Math.random() * snapshot.docs.length)
+      setRandomIndex(randomID);
       let randomWord = snapshot.docs[randomID].data()
       let randomWordDocumentID = snapshot.docs[randomID].id
       setdocLength(snapshot.docs.length)
@@ -56,10 +62,126 @@ export default function RecordScreen() {
     })
   }
 
+  async function fetchWord(){
+    db.collection("words").onSnapshot(snapshot=>{
+      
+      
+        snapshot.docs.forEach(data =>{
+          
+          const pattern = /^r\//;
+          if(pattern.test(data.data().word)){
+            listwords.push(data.data());
+          }
+          
+          
+        })
+        console.log(listwords)
+        setHasRandomWordLoaded(true)
+
+        setCount(count + 1);
+    })
+  }
+
+  function Cards(){
+    
+     return (<div className="list_cards" style={{display:'flex',flexDirection:"column",gap:20}}>
+        {listwords.map((word)=>{
+  
+  return (
+    <Paper sx={{ p: 6, textAlign: 'center' }} elevation={3} key={word.word} >
+            
+              <p>Press Speak Button and then read the word/sentence in bold.</p>
+              <h1>{word.word}</h1>
+              {
+                hasRecorded ? (
+                  uploadProgress == 100 ? (
+                    <>
+                      <Box sx={{ textAlign: 'left' }}>
+
+                        <Alert severity="success">
+                          <AlertTitle>Thank You.</AlertTitle>
+                          We Recorded the Audio for this word Successfully, Please Click on the Next Button to Load the Next Word.
+                        </Alert>
+
+                        <Button  sx={{ mt: 4 }} style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins' }}>
+                          Next Word
+                        </Button>
+                      </Box>
+
+                    </>
+                  ) : (
+                    <>
+                      <Box sx={{ textAlign: 'left' }}>
+                        <Alert severity="warning">
+                          <AlertTitle>Your Audio has been recorded.</AlertTitle>
+                          Listen the audio and then press the confrim button to submit your audio.
+
+                          <Box sx={{ mt: 2, mb: 4 }}>
+
+                            <audio id="PlayAudio" style={{ display: 'none' }} src={blobURL} controls />
+
+                            <Button onClick={ListenRecording} variant="contained" color='secondary'>Listen Recording</Button>
+
+                          </Box>
+                          {
+                            uploadProgress == 0 ? (
+                              <>
+                                <Button sx={{ m: 1 }} onClick={UploadToDatabase} disabled={isUploading} variant='contained'>Confirm and Upload</Button>
+                                <Button sx={{ m: 1 }} onClick={DiscardRecording} disabled={isUploading} variant='outlined' color="error">Record Again</Button>
+
+                              </>
+
+                            ) : (
+                              <>
+                                <LinearProgress variant="determinate" value={uploadProgress} />
+
+                                <Button sx={{ mt: 4 }} style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins' }}>
+                                  Next Word
+                                </Button>
+                              </>
+                            )
+                          }
+                        </Alert>
+                      </Box>
+                    </>
+                  )
+                ) : (
+                  !isRecording ? (
+                    <>
+                      <audio style={{ display: 'none' }} id='fetchAudio' src={word.url} controls></audio><br />
+                      <Button onClick={ListenRecordin} variant='outlined' color="success" style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins', color: '#008000', margin: "10px" }}>
+                        <KeyboardVoiceIcon />
+                        Listen
+                      </Button>
+                      <Button onClick={start} variant='outlined' color='error' style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins', color: '#dc3545' }}>
+                        <KeyboardVoiceIcon />
+                        Speak Now
+                      </Button> <br />
+                      <Button  sx={{ mt: 4 }} style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins' }}>
+                        Next Word
+                      </Button>
+                    </>
+                  ) : (
+                    <Button onClick={stopFunction} variant='contained' color='error' style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins', color: '#fff' }}>
+                      <KeyboardVoiceIcon />
+                      Stop Recording
+                    </Button>
+                  )
+                )
+              }
+           </Paper>
+  )
+})}
+      
+     </div>)
+    
+  }
+
 
   useEffect(() => {
     // Get Words List From Database
-    FetchRandomWord()
+    
+    fetchWord()
     navigator.getUserMedia({ audio: true },
       () => {
         setIsBlocked(false);
@@ -90,15 +212,13 @@ export default function RecordScreen() {
   };
   async function fetchAudio() {
     const ref = db.collection('audiometadata');
-    const snapshot = (await ref.get()).docs[0].data();
-    console.log(snapshot.url);
-    setaudioUrl(snapshot.url)
-    console.log(audioUrl);
+    const snapshot = (await ref.get()).docs[random_index].data();
+    setaudioUrl(snapshot.url);
 
     ListenRecordin();
   }
   async function ListenRecordin() {
-    let audio = document.getElementById('fetchAudio')
+    let audio = document.getElementById('fetchAudio');
     audio.play()
   }
 
@@ -152,10 +272,17 @@ export default function RecordScreen() {
             url: url,
             wordID: randomWordDocumentID,
             word: randomWord.word,
+          })
+
+          db.collection("words").add({
+            word: randomWord.word,
+            url:url
+          
           }).then(() => {
             setIsUploading(false)
 
           })
+          
         })
       }
     )
@@ -419,7 +546,7 @@ export default function RecordScreen() {
           <Container maxWidth="sm" sx={{ mt: 10, }}>
              
             
-              {docLength + 1 == count ? <>
+              {list.length + 1 == count ? <>
                 <div className="card">
                   <div className="card-body">
                     <h5 className="card-title">Success!</h5>
@@ -427,88 +554,8 @@ export default function RecordScreen() {
                   </div>
                 </div>
               </> :
-              <Paper sx={{ p: 6, textAlign: 'center' }} elevation={3}>
-                
-                  <p>Press Speak Button and then read the word/sentence in bold.</p>
-                  <h1>{randomWord.word}</h1>
-                  {
-                    hasRecorded ? (
-                      uploadProgress == 100 ? (
-                        <>
-                          <Box sx={{ textAlign: 'left' }}>
-
-                            <Alert severity="success">
-                              <AlertTitle>Thank You.</AlertTitle>
-                              We Recorded the Audio for this word Successfully, Please Click on the Next Button to Load the Next Word.
-                            </Alert>
-
-                            <Button onClick={LoadNextWord} sx={{ mt: 4 }} style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins' }}>
-                              Next Word
-                            </Button>
-                          </Box>
-
-                        </>
-                      ) : (
-                        <>
-                          <Box sx={{ textAlign: 'left' }}>
-                            <Alert severity="warning">
-                              <AlertTitle>Your Audio has been recorded.</AlertTitle>
-                              Listen the audio and then press the confrim button to submit your audio.
-
-                              <Box sx={{ mt: 2, mb: 4 }}>
-
-                                <audio id="PlayAudio" style={{ display: 'none' }} src={blobURL} controls />
-
-                                <Button onClick={ListenRecording} variant="contained" color='secondary'>Listen Recording</Button>
-
-                              </Box>
-                              {
-                                uploadProgress == 0 ? (
-                                  <>
-                                    <Button sx={{ m: 1 }} onClick={UploadToDatabase} disabled={isUploading} variant='contained'>Confirm and Upload</Button>
-                                    <Button sx={{ m: 1 }} onClick={DiscardRecording} disabled={isUploading} variant='outlined' color="error">Record Again</Button>
-
-                                  </>
-
-                                ) : (
-                                  <>
-                                    <LinearProgress variant="determinate" value={uploadProgress} />
-
-                                    <Button onClick={LoadNextWord} sx={{ mt: 4 }} style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins' }}>
-                                      Next Word
-                                    </Button>
-                                  </>
-                                )
-                              }
-                            </Alert>
-                          </Box>
-                        </>
-                      )
-                    ) : (
-                      !isRecording ? (
-                        <>
-                          <audio style={{ display: 'none' }} id='fetchAudio' src={audioUrl} controls></audio><br />
-                          <Button onClick={fetchAudio} variant='outlined' color="success" style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins', color: '#008000', margin: "10px" }}>
-                            <KeyboardVoiceIcon />
-                            Listen
-                          </Button>
-                          <Button onClick={start} variant='outlined' color='error' style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins', color: '#dc3545' }}>
-                            <KeyboardVoiceIcon />
-                            Speak Now
-                          </Button> <br />
-                          <Button onClick={LoadNextWord} sx={{ mt: 4 }} style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins' }}>
-                            Next Word
-                          </Button>
-                        </>
-                      ) : (
-                        <Button onClick={stopFunction} variant='contained' color='error' style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins', color: '#fff' }}>
-                          <KeyboardVoiceIcon />
-                          Stop Recording
-                        </Button>
-                      )
-                    )
-                  }
-               </Paper>
+                  <Cards/>
+                           
               }
 
             
