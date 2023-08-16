@@ -17,6 +17,11 @@ export default function HeaderComponent() {
 
       const pages = [
         {
+          name: 'Home',
+          link: "",
+          href: 'https://svar.in'
+        },
+        {
           name: 'About',
           link: '/About'
         },
@@ -25,10 +30,7 @@ export default function HeaderComponent() {
           link: '/Contact'
         },
 
-        {
-          name: 'Github',
-          link: '/'
-        }
+        
       ]
 
     
@@ -96,7 +98,11 @@ export default function HeaderComponent() {
               onClick={handleCloseNavMenu}
               sx={{ my: 2, color: 'white', display: 'block' }}
             >
-               <Link style={{textDecoration: 'none', color: '#0A1B29'}} to={page.link}>{page.name}</Link>
+
+               {(page.link != "")? (<Link style={{textDecoration: 'none', color: '#0A1B29'}} to={page.link}>{page.name}</Link>)
+                : (
+                <a href={page.href} style={{textDecoration: 'none'}}><Typography style={{textDecoration: 'none', color: '#0A1B29'}}>{page.name}</Typography></a>
+               )}
               
             </Button>
           ))}
