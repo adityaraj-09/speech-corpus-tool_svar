@@ -16,6 +16,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import FooterComponent from '../Components/FooterComponent';
 import audioBufferToWav from 'audiobuffer-to-wav';
 import UserForm from './userFormScreen';
+import { useRef } from 'react';
 const { v4: uuidv4 } = require('uuid');
 
 // Initilize the recorder
@@ -65,34 +66,37 @@ export default function RecordScreen() {
     })
   }
 
-  async function fetchWord() {
+  async function fetchWord(n) {
+    listwords.clear()
     db.collection("words").onSnapshot(snapshot => {
 
 
       snapshot.docs.forEach(data => {
 
         const pattern = /^r\//;
-        if (pattern.test(data.data().word)) {
-          listwords.add(data.data());
-          console.log("lkjhgfd")
+        if (data.data().word.startsWith(list[n])) {
+         listwords.add(data.data());
+
         }
 
 
       })
       setHasRandomWordLoaded(true)
 
-      setCount(count + 1);
+      
     })
   }
 
   function Cards() {
     
     const array=Array.from(listwords)
+    console.log('nkn')
     return (<div className="list_cards" style={{ display: 'flex', flexDirection: "column", gap: 20 }}>
       {
       array.map((word) => {
 
         return (
+          
           <Paper sx={{ p: 6, textAlign: 'center' }} elevation={3} key={word.word} >
 
             <p>Press Speak Button and then read the word/sentence in bold.</p>
@@ -108,9 +112,7 @@ export default function RecordScreen() {
                         We Recorded the Audio for this word Successfully, Please Click on the Next Button to Load the Next Word.
                       </Alert>
 
-                      <Button sx={{ mt: 4 }} style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins' }}>
-                        Next Word
-                      </Button>
+                      
                     </Box>
 
                   </>
@@ -140,9 +142,7 @@ export default function RecordScreen() {
                             <>
                               <LinearProgress variant="determinate" value={uploadProgress} />
 
-                              <Button sx={{ mt: 4 }} style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins' }}>
-                                Next Word
-                              </Button>
+                              
                             </>
                           )
                         }
@@ -153,18 +153,16 @@ export default function RecordScreen() {
               ) : (
                 (isRecording != word.word) ? (
                   <>
-                    <audio style={{ display: 'none' }} id='fetchAudio' src={word.url} controls></audio><br />
-                    <Button onClick={ListenRecordin} variant='outlined' color="success" style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins', color: '#008000', margin: "10px" }}>
+                    <audio style={{ display: 'none' }} id={word.word} src={word.url} controls></audio><br />
+                    <Button onClick={()=>ListenRecording(word.word)} variant='outlined' color="success" style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins', color: '#008000', margin: "10px" }}>
                       <KeyboardVoiceIcon />
-                      Listen
+                      Listen Model Voice
                     </Button>
                     <Button onClick={() => start(word.word)} variant='outlined' color='error' style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins', color: '#dc3545' }}>
                       <KeyboardVoiceIcon />
                       Speak Now
                     </Button> <br />
-                    <Button sx={{ mt: 4 }} style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins' }}>
-                      Next Word
-                    </Button>
+                    
                   </>
                 ) : (
                   <Button onClick={() => stopFunction(word.word)} variant='contained' color='error' style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins', color: '#fff' }}>
@@ -182,23 +180,24 @@ export default function RecordScreen() {
 
   }
 
-
+  const initialiased=useRef(false)
   useEffect(() => {
-    // Get Words List From Database
-    
-    fetchWord()
-    
-    navigator.getUserMedia({ audio: true },
-      () => {
-        setIsBlocked(false);
-      },
-      () => {
-        alert('Access to Microphone Is Blocked. Please Allow Access to Microphone in Settings.');
-        setIsBlocked(true);
-      },
-    );
-
-  }, [])
+    if (!initialiased.current) {
+      initialiased.current = true
+      fetchWord(count)
+      navigator.getUserMedia({ audio: true },
+        () => {
+          setIsBlocked(false);
+        },
+        () => {
+          alert('Access to Microphone Is Blocked. Please Allow Access to Microphone in Settings.');
+          setIsBlocked(true);
+        },
+      );
+  
+    }
+  
+  }, [count])
 
 
   // Start Recording Function
@@ -206,6 +205,7 @@ export default function RecordScreen() {
     setpresent(a)
     setUploadProgress(0)
     setIsUploading(false)
+    DiscardRecording()
     if (isBlocked) {
       alert('Access to Microphone Is Blocked. Please Allow Access to Microphone in Settings.');
     } else {
@@ -256,7 +256,7 @@ export default function RecordScreen() {
 
   }
 
-  // Function to Upload Recording to Database
+  
   async function UploadToDatabase(a) {
     
     setIsUploading(true)
@@ -306,6 +306,7 @@ export default function RecordScreen() {
             ).then(() => {
               
             setIsUploading(false)
+            console.log("repeat")
 
           })
 
@@ -386,6 +387,19 @@ export default function RecordScreen() {
     })
 
   };
+
+  function next_page(){
+    var a=count+1
+    setCount(count+1)
+    setHasRandomWordLoaded(false)
+    fetchWord(a)
+  } 
+  function prev_page(){
+    var a=count-1
+    setCount(count-1)
+    setHasRandomWordLoaded(false)
+    fetchWord(a)
+  } 
 
 
 
@@ -589,7 +603,7 @@ export default function RecordScreen() {
             <Container maxWidth="sm" sx={{ mt: 10, }}>
 
 
-              {list.length + 1 == count ? <>
+              {list.length  == count ? <>
                 <div className="card">
                   <div className="card-body">
                     <h5 className="card-title">Success!</h5>
@@ -597,12 +611,35 @@ export default function RecordScreen() {
                   </div>
                 </div>
               </> :
-                <Cards />
+              <Cards/>
+                
 
               }
 
 
             </Container>
+
+            <div className="next_pre">
+            {(count==0 || count==list.length)?<div></div>:
+
+            <div className="next">
+              <Button  style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins',color:"#fff" }} onClick={prev_page}>
+                      Previous Word
+                    </Button>
+                    
+                    
+                    </div>
+            }
+            {count==list.length ?<div></div>:
+
+            <div className="next"><Button  style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins',color:"#fff" }} onClick={next_page}>
+                      Next Word
+                    </Button>
+                    
+                    
+                    </div>
+            }
+            </div>
           </Container>}
 
         <Box sx={{ mt: 6 }} >
