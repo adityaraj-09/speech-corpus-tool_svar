@@ -91,7 +91,7 @@ export default function RecordScreen() {
   return (
     <Paper sx={{ p: 6, textAlign: 'center' }} elevation={3} key={word.word} >
             
-              <p>Press Speak Button and then read the word/sentence in bold.</p>
+              <p>Press Listen button to listen to the sound then press Speak button and produce similar sound</p>
               <h1>{word.word}</h1>
               {
                 hasRecorded ? (
