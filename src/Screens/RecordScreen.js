@@ -16,6 +16,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import FooterComponent from '../Components/FooterComponent';
 import audioBufferToWav from 'audiobuffer-to-wav';
 import UserForm from './userFormScreen';
+import { ConnectingAirportsOutlined } from '@mui/icons-material';
 const { v4: uuidv4 } = require('uuid');
 
 // Initilize the recorder
@@ -24,6 +25,21 @@ const Mp3Recorder = new MicRecorder({
   prefix: "data:audio/wav;base64,",
 });
 
+
+var list = ["m", "l"]
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+  }
+}
+
+shuffleArray(list)
+
+// const list = shuffleArray(letters)
+console.log("list")
+console.log(list)
 
 
 export default function RecordScreen() {
@@ -40,54 +56,79 @@ export default function RecordScreen() {
   const [isUploading, setIsUploading] = React.useState(false)
   const [runInterval, setRunInterval] = React.useState(false)
   const [audioUrl, setaudioUrl] = React.useState(null)
-  const [count, setCount] = React.useState(0)
+  // const [count, setCount] = React.useState(0)
   const [docLength, setdocLength] = React.useState(0)
   const [submittedForm, setSubmitted] = React.useState(false)
   const [random_index, setRandomIndex] = React.useState(0)
-  const [listwords, setlistwords] = React.useState(new Set())
   const [presentrecord, setpresent] = React.useState("")
+  const [listobject, setListObject] = React.useState({})
+  var [currentletter, setCurrentLetter] = React.useState("")
+  const [done, setDone] = React.useState(0)
+  const [recordedObject, setRecordedObject] = React.useState({})
 
-  const list = ["r", "l"]
 
-  async function FetchRandomWord() {
-    db.collection('words').onSnapshot(snapshot => {
-      // Set Random Word
-      let randomID = Math.floor(Math.random() * snapshot.docs.length)
-      setRandomIndex(randomID);
-      let randomWord = snapshot.docs[randomID].data()
-      let randomWordDocumentID = snapshot.docs[randomID].id
-      setdocLength(snapshot.docs.length)
-      setRandomWordDocumentID(randomWordDocumentID)
-      setRandomWord(randomWord)
-      setHasRandomWordLoaded(true)
-      setCount(count + 1);
+  // console.log(Object.keys(recordedObject).length == Object.keys(listobject).length)
+  // console.log(Object.keys(recordedObject).length)
+  // console.log(Object.keys(listobject).length)
 
-    })
-  }
+  
+
+
+
+
+  // async function FetchRandomWord() {
+  //   db.collection('words').onSnapshot(snapshot => {
+  //     // Set Random Word
+  //     let randomID = Math.floor(Math.random() * snapshot.docs.length)
+  //     setRandomIndex(randomID);
+  //     let randomWord = snapshot.docs[randomID].data()
+  //     let randomWordDocumentID = snapshot.docs[randomID].id
+  //     setdocLength(snapshot.docs.length)
+  //     setRandomWordDocumentID(randomWordDocumentID)
+  //     setRandomWord(randomWord)
+  //     setHasRandomWordLoaded(true)
+  //     // setCount(count + 1);
+
+  //   })
+  // }
 
   async function fetchWord() {
     db.collection("words").onSnapshot(snapshot => {
 
-
-      snapshot.docs.forEach(data => {
-
-        const pattern = /^r\//;
-        if (pattern.test(data.data().word)) {
-          listwords.add(data.data());
-          console.log("lkjhgfd")
-        }
+      console.log("done")
+      console.log(done)
 
 
-      })
-      setHasRandomWordLoaded(true)
+      if (done < list.length){
+        currentletter = list[done]
 
-      setCount(count + 1);
+        const pattern = new RegExp(`^${currentletter}/`);
+
+        snapshot.docs.forEach(data => {
+          if (pattern.test(data.data().word)) {
+            listobject[data.data().word] = data.data().url? data.data().url : ""
+          }
+
+
+        })
+
+        setListObject(listobject)
+        console.log("listobject")
+        console.log(listobject)
+        console.log(Object.keys(listobject).length)
+        setHasRandomWordLoaded(true)
+      }
+
+      // setCount(count + 1);
     })
   }
 
   function Cards() {
     
-    const array=Array.from(listwords)
+    const array = Object.keys(listobject).map(key => ({
+      word: key,
+      url: listobject[key]
+  }));
     return (<div className="list_cards" style={{ display: 'flex', flexDirection: "column", gap: 20 }}>
       {
       array.map((word) => {
@@ -98,8 +139,8 @@ export default function RecordScreen() {
             <p>Press Speak Button and then read the word/sentence in bold.</p>
             <h1>{word.word}</h1>
             {
-              (hasRecorded == word.word) ? (
-                (uploadProgress == 100 && presentrecord == word.word) ? (
+              (hasRecorded == word.word || (recordedObject[word.word] != null && recordedObject[word.word])  ) ? (
+                ((uploadProgress == 100 && presentrecord == word.word) || recordedObject[word.word]) ? (
                   <>
                     <Box sx={{ textAlign: 'left' }}>
 
@@ -108,9 +149,9 @@ export default function RecordScreen() {
                         We Recorded the Audio for this word Successfully, Please Click on the Next Button to Load the Next Word.
                       </Alert>
 
-                      <Button sx={{ mt: 4 }} style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins' }}>
+                      {/* <Button sx={{ mt: 4 }} style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins' }}>
                         Next Word
-                      </Button>
+                      </Button> */}
                     </Box>
 
                   </>
@@ -140,9 +181,9 @@ export default function RecordScreen() {
                             <>
                               <LinearProgress variant="determinate" value={uploadProgress} />
 
-                              <Button sx={{ mt: 4 }} style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins' }}>
+                              {/* <Button sx={{ mt: 4 }} style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins' }}>
                                 Next Word
-                              </Button>
+                              </Button> */}
                             </>
                           )
                         }
@@ -162,9 +203,9 @@ export default function RecordScreen() {
                       <KeyboardVoiceIcon />
                       Speak Now
                     </Button> <br />
-                    <Button sx={{ mt: 4 }} style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins' }}>
+                    {/* <Button sx={{ mt: 4 }} style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins' }}>
                       Next Word
-                    </Button>
+                    </Button> */}
                   </>
                 ) : (
                   <Button onClick={() => stopFunction(word.word)} variant='contained' color='error' style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins', color: '#fff' }}>
@@ -176,9 +217,18 @@ export default function RecordScreen() {
             }
           </Paper>
         )
-      })}
+      })
+      
+      
+      }
 
-    </div>)
+    </div>
+
+    
+    
+    
+
+    )
 
   }
 
@@ -198,7 +248,7 @@ export default function RecordScreen() {
       },
     );
 
-  }, [])
+  }, [done])
 
 
   // Start Recording Function
@@ -217,13 +267,13 @@ export default function RecordScreen() {
         }).catch((e) => console.error(e));
     }
   };
-  async function fetchAudio() {
-    const ref = db.collection('audiometadata');
-    const snapshot = (await ref.get()).docs[random_index].data();
-    setaudioUrl(snapshot.url);
+  // async function fetchAudio() {
+  //   const ref = db.collection('audiometadata');
+  //   const snapshot = (await ref.get()).docs[random_index].data();
+  //   setaudioUrl(snapshot.url);
 
-    ListenRecordin();
-  }
+  //   ListenRecordin();
+  // }
   async function ListenRecordin() {
     let audio = document.getElementById('fetchAudio');
     audio.play()
@@ -279,7 +329,11 @@ export default function RecordScreen() {
           db.collection('audiometadata').add({
             url: url,
             word: a,
+            recorder: id
           })
+
+
+
           const docRef = db.collection('recorders').doc(id);
 
           try {
@@ -300,6 +354,9 @@ export default function RecordScreen() {
         (await query.get()).forEach((data) => {
             docid=data.id
           })
+
+
+
           const ref=db.collection("words").doc(docid)
           
           ref.update({url:url}
@@ -307,7 +364,16 @@ export default function RecordScreen() {
               
             setIsUploading(false)
 
+            recordedObject[a] = true
+  
+            setRecordedObject(recordedObject)
+
+            console.log("recordedObject")
+            console.log(recordedObject)
+            console.log(Object.keys(recordedObject).length)
+            
           })
+
 
         })
       }
@@ -320,7 +386,10 @@ export default function RecordScreen() {
   async function LoadNextWord() {
     setUploadProgress(0)
     DiscardRecording()
-    await FetchRandomWord()
+    setDone(done+1)
+    setRecordedObject({})
+    setListObject({})
+    await fetchWord()
   }
 
   // Listen to Recording By User
@@ -387,7 +456,9 @@ export default function RecordScreen() {
 
   };
 
-
+  async function Refresh() {
+    window.location.reload();
+  }
 
   return (
 
@@ -589,15 +660,25 @@ export default function RecordScreen() {
             <Container maxWidth="sm" sx={{ mt: 10, }}>
 
 
-              {list.length + 1 == count ? <>
-                <div className="card">
-                  <div className="card-body">
+              {list.length == done ? <>
+                {/* <div className="card"> */}
+                  <div className="card-body" style = {{justifyContent: "center", position: "relative", alignItems: "center"}} >
                     <h5 className="card-title">Success!</h5>
                     <p className="card-text">All voice samples have been recorded</p>
+                    
+                    <Button sx={{ mt: 4 }} onClick={Refresh} style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins', left: "50%", transform: "translate(-50%,0)"    }} disabled={(Object.keys(recordedObject).length == Object.keys(listobject).length)} variant='outlined'>
+                        New Session
+                      </Button>
+                    
                   </div>
-                </div>
+                {/* </div> */}
               </> :
+              <div style = {{justifyContent: "center", position: "relative", alignItems: "center"}}>
                 <Cards />
+                <Button sx={{ mt: 4 }} onClick={LoadNextWord} style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins', left: "50%", transform: "translate(-50%,0)"    }} disabled={(Object.keys(recordedObject).length == Object.keys(listobject).length)} variant='outlined'>
+                        Next Word
+                      </Button>
+              </div>
 
               }
 
