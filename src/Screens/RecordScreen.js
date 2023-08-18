@@ -196,7 +196,7 @@ export default function RecordScreen() {
                   <>
                     <audio style={{ display: 'none' }} id='fetchAudio' src={word.url} controls></audio><br />
                     <Button onClick={ListenRecordin} variant='outlined' color="success" style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins', color: '#008000', margin: "10px" }}>
-                      <KeyboardVoiceIcon />
+                      <VolumeUpIcon />
                       Listen
                     </Button>
                     <Button onClick={() => start(word.word)} variant='outlined' color='error' style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins', color: '#dc3545' }}>
