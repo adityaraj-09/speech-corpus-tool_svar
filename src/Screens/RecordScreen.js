@@ -666,7 +666,7 @@ export default function RecordScreen() {
                     <h5 className="card-title">Success!</h5>
                     <p className="card-text">All voice samples have been recorded</p>
                     
-                    <Button sx={{ mt: 4 }} onClick={Refresh} style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins', left: "50%", transform: "translate(-50%,0)"    }} disabled={(Object.keys(recordedObject).length == Object.keys(listobject).length)} variant='outlined'>
+                    <Button sx={{ mt: 4 }} onClick={Refresh} style={{ fontSize: '14px', fontWeight: '600', fontFamily: 'Poppins', left: "50%", transform: "translate(-50%,0)"    }} variant='outlined'>
                         New Session
                       </Button>
                     
